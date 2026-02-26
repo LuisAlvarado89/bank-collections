@@ -3,9 +3,7 @@ package org.ies.tierno.models;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Data
 @AllArgsConstructor
@@ -14,14 +12,16 @@ public class Bank {
     private Map<String, Account> accountsByIban;
     private List<Customer> customers;
 
-    public void deposit(String iban, double amount) {
+    public boolean deposit(String iban, double amount) {
         if (accountsByIban.containsKey(iban)) {
             Account account = accountsByIban.get(iban);
             account.deposit(amount);
+            return true;
         } else {
             System.out.printf("Error: No existe la cuenta");
 
         }
+        return false;
     }
 
     public List<Account> getCustomerAccounts(String nif) {
@@ -62,10 +62,11 @@ public class Bank {
         }
     }
 
-    public Customer customerZipCode(int zipcode) {
+    public Set<String> customerZipCode(int zipcode) {
+        Set<String> nifs = new HashSet<>();
         for (Customer customer : customers) {
             if (customer.getZipCode() == zipcode) {
-                return customer;
+                return nifs;
             }
         }
         return null;
@@ -73,9 +74,9 @@ public class Bank {
 
     public List<Account> accountProperty(int zipCode) {
         List<Account> accounts = new ArrayList<>();
-        Customer customer = customerZipCode(zipCode);
-        for (Account account : accountsByIban.values()) {
-            if (account.getNif().equals(customer.getNif())) {
+        var customer = customerZipCode(zipCode);
+        for (var account : accountsByIban.values()) {
+            if (account.getNif().equals(account.getNif())) {
                 accounts.add(account);
 
             }
