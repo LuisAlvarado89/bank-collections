@@ -1,4 +1,4 @@
-package org.ies.tierno.models;
+package org.ies.tierno.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,11 +14,13 @@ public class Account {
         balance += amount;
     }
 
-    public void withdraw(double amount) {
+    public boolean withdraw(double amount) {
         if (balance >= amount) {
             balance -= amount;
+            return true;
         } else {
-            System.out.printf("No hay saldo suficiente");
+            System.out.println("No hay saldo suficiente");
+            return false;
         }
     }
 }

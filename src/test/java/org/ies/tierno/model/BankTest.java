@@ -1,14 +1,15 @@
 package org.ies.tierno.model;
 
-import org.ies.tierno.models.Account;
-import org.ies.tierno.models.Bank;
-import org.ies.tierno.models.Customer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BankTest {
 
@@ -16,33 +17,31 @@ public class BankTest {
     public void depositTest() {
         Bank bank = createTestBank();
 
-        boolean res = bank.deposit("ES1", 150);
+        boolean res = bank.deposit("ES1", 100);
 
         Assertions.assertTrue(res);
-        Assertions.assertEquals(250, bank.getAccountsByIban().get("ES1").getBalance());
+        Assertions.assertEquals(200, bank.getAccountsByIban().get("ES1").getBalance());
     }
 
     @Test
     public void depositNoAccountTest() {
         Bank bank = createTestBank();
 
-        boolean res = bank.deposit("ES1345345", 150);
+        boolean res = bank.deposit("ES1345345", 100);
 
         Assertions.assertFalse(res);
-        Assertions.assertEquals(250, bank.getAccountsByIban().get("ES1").getBalance());
     }
 
     @Test
-    public void customerAccountTest() {
+    public void customerAccountsTest() {
         Bank bank = createTestBank();
 
-        List<Account> res = bank.getCustomerAccounts("1X");
-        res.sort(Comparator.comparing(Account::getIban));
+        Set<Account> res = bank.getCustomerAccounts("1X").stream().collect(Collectors.toSet());
 
         Assertions.assertEquals(
-                List.of(
-                        new Account("ES1", "2E", 345),
-                        new Account("ES4", "2E", 1500)
+                Set.of(
+                        new Account("ES1", "1X", 100),
+                        new Account("ES2", "1X", 10)
                 ),
                 res
         );
@@ -55,6 +54,42 @@ public class BankTest {
         List<Account> res = bank.getCustomerAccounts("134X");
 
         Assertions.assertNull(res);
+    }
+
+    @Test
+    public void withdrawTest() {
+        Bank bank = createTestBank();
+
+        boolean success = bank.withdraw("ES3", 200);
+
+        Assertions.assertTrue(success);
+
+        Account account = bank.findAccount("ES3");
+        Assertions.assertEquals(800, account.getBalance());
+    }
+
+    @Test
+    public void withdrawNotEnougthBalanceTest() {
+        Bank bank = createTestBank();
+
+        boolean success = bank.withdraw("ES3", 1200);
+
+        Assertions.assertFalse(success);
+
+        Account account = bank.findAccount("ES3");
+        Assertions.assertEquals(1000, account.getBalance());
+    }
+
+    @Test
+    public void withdrawAccountNotFoundTest() {
+        Bank bank = createTestBank();
+
+        boolean success = bank.withdraw("ES33", 1200);
+
+        Assertions.assertFalse(success);
+    }
+    public void transferTest(){
+        Bank bank = createTestBank();
     }
 
 
@@ -75,7 +110,9 @@ public class BankTest {
                 "ES6", new Account("ES6", "2T", 1780)
 
         );
-        return new Bank("Caixa", accountsByIban, customers);
+        return new Bank("Caixa", customers, accountsByIban);
     }
 
 }
+
+
